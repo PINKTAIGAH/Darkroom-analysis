@@ -12,10 +12,12 @@ MARKER_STYLE = "x"
 MARKER_COLOR = "red"
 MARKER_SIZE = 0.5
 COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "plateau_1_end", "peak_start", "peak_end", "plateau_2_start", "plateau_2_end"]
+FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis"]
 # COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "peak_start", "peak_end",  "plateau_2_end"]
 EXPECTED_EVENT_COORDS = len(COORDS_OF_INTEREST_KEYS)
 RUN_NUMBER = 8
 PLOT_TIME_AXIS = True
+AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential"]
 
 def load_data():
     """
@@ -37,6 +39,55 @@ def load_data():
     mean_current = processed_data[:, 2] 
     
     return time, applied_voltage, mean_current
+
+def feature_io():
+    """
+    I/O loop for the name and hypothesis for the feature of interest
+    """
+
+    feature_of_interest_names = []
+    feature_of_interest_hypothesis = []
+
+    while True:
+        feature_of_interest_names.append(feature_name_input_loop(feature_of_interest_names))
+        feature_of_interest_hypothesis.append(feature_hypothesis_input_loop())
+        continue_loop = input("\nAdd a new feature? [y/n]: ")
+        if continue_loop != "y":
+            break
+
+    features_of_interest_dict = {
+        name: {
+            key: None for key in FEATURE_OF_INTEREST_KEYS
+        } for name in feature_of_interest_names
+    }
+
+    for name, hypothesis in zip(feature_of_interest_names, feature_of_interest_hypothesis):
+        features_of_interest_dict[name]["hypothesis"] = hypothesis
+
+    return features_of_interest_dict
+        
+
+def feature_name_input_loop(feature_of_interest_names, feature_name=None,):
+    
+        while feature_name is None:
+            feature_name = input("\nInput name of feature: ")
+        
+            if feature_name in feature_of_interest_names:
+                feature_name = None
+                print("\nName of feature is already in use. Please name it something else")
+            
+        return feature_name
+
+def feature_hypothesis_input_loop(feature_hypothesis=None):
+
+        while feature_hypothesis is None:
+            feature_hypothesis = input("\nInput feature hypothesis: ")
+
+            if feature_hypothesis not in AVAILABLE_FEATURE_HYPOTHESIS:
+                feature_hypothesis = None
+                print(f"\nThe hypothesis selected is not recognised. Please choose from {AVAILABLE_FEATURE_HYPOTHESIS}")
+            
+        return feature_hypothesis    
 
 
 def plot_mean_current(mean_current, time):
@@ -62,6 +113,7 @@ def plot_mean_current(mean_current, time):
 
     # Save envent coordiantes
     event_coords = clicker_module.get_positions()["event"]
+    print(type(event_coords))
     print(f"\nNumber of events recorded: {event_coords.shape[0]}\n")
 
     return event_coords
@@ -133,10 +185,13 @@ def plot_features_of_interest(mean_current_peak, mean_current_plateau, time_peak
     fig.tight_layout()
     plt.show()
 
-if __name__ == "__main__":
-    
+def main():
+
     # Obtain measurments of run
     time, voltage, mean_current = load_data()
+
+    features_of_interest_dict = feature_io()
+
 
     """
     Debugging
@@ -150,7 +205,7 @@ if __name__ == "__main__":
     event_coords = plot_mean_current(mean_current, time)
 
     # Verify number of events match what is expected and obtain combined arrays for the plateus and peaks
-    if event_coords.shape[0] == EXPECTED_EVENT_COORDS:
+    if event_coords.shape[0]/2 == len(features_of_interest_dict):
         # Create arrays containing the current peak and plateu
         mean_current_peak, mean_current_plateu, time_peak, time_plateu= generate_combined_arrays(event_coords, mean_current, time)
 
@@ -159,3 +214,13 @@ if __name__ == "__main__":
 
     # Plot the peak and plateu 
     plot_features_of_interest(mean_current_peak, mean_current_plateu, time_peak, time_plateu)   
+
+
+def test():
+
+    main()
+
+
+if __name__ == "__main__":
+    test()
+    
