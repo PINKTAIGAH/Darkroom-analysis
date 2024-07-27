@@ -12,7 +12,7 @@ MARKER_STYLE = "x"
 MARKER_COLOR = "red"
 MARKER_SIZE = 0.5
 COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "plateau_1_end", "peak_start", "peak_end", "plateau_2_start", "plateau_2_end"]
-FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis"]
+FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis", "current", "time", "voltage"]
 # COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "peak_start", "peak_end",  "plateau_2_end"]
 EXPECTED_EVENT_COORDS = len(COORDS_OF_INTEREST_KEYS)
 RUN_NUMBER = 8
@@ -118,15 +118,16 @@ def plot_mean_current(mean_current, time):
 
     return event_coords
 
-def generate_combined_arrays(event_coords, mean_current, time):
+def generate_combined_arrays(event_coords, mean_current, time, feature_dict):
     """
     Use event coords to create combined arrays of features of interest
     """ 
         
     # Create a dictionary containing the x coords for the coordinates of interest    
+
     COORDS_OF_INTEREST = dict(zip(COORDS_OF_INTEREST_KEYS, event_coords[:, 0].astype(int) ))
-    # print(COORDS_OF_INTEREST)
-    # print(COORDS_OF_INTEREST["peak_start"], COORDS_OF_INTEREST["peak_end"])
+    for idx, name in enumerate(feature_dict):
+        feature_dict[name]["coord"] = (event_coords[idx, 0], event_coords[idx+1, 0])
 
     # Create an array for the mean current peak
     mean_current_peak = mean_current[COORDS_OF_INTEREST["peak_start"] : COORDS_OF_INTEREST["peak_end"]]
