@@ -48,12 +48,9 @@ def feature_io():
     feature_of_interest_names = []
     feature_of_interest_hypothesis = []
 
-    while True:
+    for _ in range(3):
         feature_of_interest_names.append(feature_name_input_loop(feature_of_interest_names))
         feature_of_interest_hypothesis.append(feature_hypothesis_input_loop())
-        continue_loop = input("\nAdd a new feature? [y/n]: ")
-        if continue_loop != "y":
-            break
 
     features_of_interest_dict = {
         name: {
@@ -127,45 +124,42 @@ def generate_combined_arrays(event_coords, mean_current, time, feature_dict):
 
     COORDS_OF_INTEREST = dict(zip(COORDS_OF_INTEREST_KEYS, event_coords[:, 0].astype(int) ))
     for idx, name in enumerate(feature_dict):
-        feature_dict[name]["coord"] = (event_coords[idx, 0], event_coords[idx+1, 0])
+        feature_dict[name]["coord"] = (event_coords[idx, 0].astype(int), event_coords[idx+1, 0].astype(int))
 
+    dict_names = list(feature_dict.keys())
     # Create an array for the mean current peak
-    mean_current_peak = mean_current[COORDS_OF_INTEREST["peak_start"] : COORDS_OF_INTEREST["peak_end"]]
-    time_peak = time[COORDS_OF_INTEREST["peak_start"] : COORDS_OF_INTEREST["peak_end"]]
+    feature_dict[dict_names[1]]["current"] = mean_current[feature_dict[dict_names[1]]["coord"][0] : feature_dict[dict_names[1]]["coord"][1]]
+    feature_dict[dict_names[1]]["time"] = time[feature_dict[dict_names[1]]["coord"][0] : feature_dict[dict_names[1]]["coord"][1]]
 
     # Create a combined array for the mean current platau
     mean_current_plateu = []
     mean_current_plateu.extend(
-        mean_current[COORDS_OF_INTEREST["plateau_1_start"]: COORDS_OF_INTEREST["plateau_1_end"]].tolist()
+        mean_current[feature_dict[dict_names[0]]["coord"][0] : feature_dict[dict_names[0]]["coord"][1]]
     )
     mean_current_plateu.extend(
-        mean_current[COORDS_OF_INTEREST["plateau_2_start"]: COORDS_OF_INTEREST["plateau_2_end"]].tolist()
+        mean_current[feature_dict[dict_names[2]]["coord"][0] : feature_dict[dict_names[2]]["coord"][1]]
     )
     # print(len(mean_current_plateu))
-    mean_current_plateu = np.array(mean_current_plateu)
-    # mean_current_plateu = np.array([
-    #     [mean_current[COORDS_OF_INTEREST["plateau_1_start"], COORDS_OF_INTEREST["plateau_1_end"]]],
-    #     [mean_current[COORDS_OF_INTEREST["plateau_2_start"], COORDS_OF_INTEREST["plateau_2_end"]]],
-    # ]).ravel()
-    # mean_current_plateu = np.delete(
-    #     mean_current, np.arange(COORDS_OF_INTEREST["peak_start"], COORDS_OF_INTEREST["peak_end"], 1)
-    #     )[ COORDS_OF_INTEREST["plateau_1_start"] : COORDS_OF_INTEREST["plateau_2_end"]]
-    time_plateu = np.arange(COORDS_OF_INTEREST["plateau_1_start"], COORDS_OF_INTEREST["plateau_1_start"] + mean_current_plateu.size)
- 
-    return mean_current_peak, mean_current_plateu, time_peak, time_plateu
+    feature_dict[dict_names[0]]["current"] = np.array(mean_current_plateu)
+    feature_dict[dict_names[2]]["current"] = np.array(mean_current_plateu)
 
-def plot_features_of_interest(mean_current_peak, mean_current_plateau, time_peak, time_plateu):
+    feature_dict[dict_names[0]]["time"] = np.arange(feature_dict[dict_names[0]]["coord"][0], feature_dict[dict_names[0]]["coord"][0] + len(mean_current_plateu))
+ 
+    return feature_dict
+
+def plot_features_of_interest(feature_dict):
     """
     Plot the user selected current peak and combined platau
     """
 
+    dict_names = list(feature_dict.keys())
     fig, (ax1, ax2) = plt.subplots(2, 1)
 
     if PLOT_TIME_AXIS:
-        ax1.scatter(time_peak, mean_current_peak, s=MARKER_SIZE)
+        ax1.scatter(feature_dict[dict_names[1]]["time"], feature_dict[dict_names[1]]["current"], s=MARKER_SIZE)
         ax1.set_xlabel("time (s)")
     else:
-        ax1.plot(mean_current_peak, lw=LINE_WIDTH)
+        ax1.plot(feature_dict[dict_names[1]]["current"], lw=LINE_WIDTH)
         ax1.set_xlabel("a.u")
 
     ax1.set_title("Mean current peak")
@@ -173,10 +167,10 @@ def plot_features_of_interest(mean_current_peak, mean_current_plateau, time_peak
     ax1.grid()
     
     if PLOT_TIME_AXIS:
-        ax2.scatter(time_plateu, mean_current_plateau, s=MARKER_SIZE)
+        ax2.scatter(feature_dict[dict_names[0]]["time"], feature_dict[dict_names[0]]["current"], s=MARKER_SIZE)
         ax2.set_xlabel("time (s)")
     else:
-        ax2.plot(mean_current_plateau, lw=LINE_WIDTH)
+        ax2.plot(feature_dict[dict_names[0]]["current"], lw=LINE_WIDTH)
         ax2.set_xlabel("a.u")
 
     ax2.set_title("Combined mean current plateau")
@@ -208,13 +202,13 @@ def main():
     # Verify number of events match what is expected and obtain combined arrays for the plateus and peaks
     if event_coords.shape[0]/2 == len(features_of_interest_dict):
         # Create arrays containing the current peak and plateu
-        mean_current_peak, mean_current_plateu, time_peak, time_plateu= generate_combined_arrays(event_coords, mean_current, time)
+        features_of_interest_dict = generate_combined_arrays(event_coords, mean_current, time, features_of_interest_dict)
 
     else:
         raise Exception(f"\nThe number of events selected is not in line with the number of expected events of {EXPECTED_EVENT_COORDS}\n")
 
     # Plot the peak and plateu 
-    plot_features_of_interest(mean_current_peak, mean_current_plateu, time_peak, time_plateu)   
+    plot_features_of_interest(features_of_interest_dict)   
 
 
 def test():
