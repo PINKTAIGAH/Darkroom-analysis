@@ -19,6 +19,18 @@ RUN_NUMBER = 8
 PLOT_TIME_AXIS = True
 AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential"]
 
+def uniform(x, a):
+    return a*x
+
+def linear(x, a, b):
+    return a*x + b
+
+def exponential(x, a, b, c):
+    return a*np.exp(b*x) + c
+
+
+
+
 def load_data():
     """
     Read, load and process data and return arrays containing the time, voltage and mean current readings of the run
