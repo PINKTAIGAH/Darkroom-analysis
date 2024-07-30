@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import random
 from iminuit import Minuit
 from iminuit.cost import UnbinnedNLL
+from scipy.optimize import curve_fit
 
 class ProbabilityDensityFunction(object):
     """
@@ -142,6 +143,7 @@ class NegativeLogLikelihood(MinimisationStatistic):
         return -loglikelihood.sum()
 
 class ChiSquared(MinimisationStatistic):
+
     """
     Class constaining chi squared statistic for optimisation
     """
@@ -176,28 +178,39 @@ class ChiSquared(MinimisationStatistic):
 
         return (predicted_data-self.data)**2/self.dataUncertanty
 
-time = np.linspace(0, 10, 100)
-signal = time*2 + 4 + np.random.normal(3, 1, size=time.shape)
+def linear(x, a, b):
+    return a*x +b
+
+def uniform(x, a):
+    return 0*x + a
+
+time = np.linspace(0, 100, 1000)
+signal = 0*time + 4 + np.random.normal(1, 1, size=time.shape)
+signal_error = np.ones_like(signal)
 
 plt.scatter(time, signal, s=2.5)
 plt.show()
 
 hypothesis = Linear(1, 1, (0, 10))
 
-plt.scatter(time, signal, s=2.5, label="data")
+plt.errorbar(time, signal, yerr=signal_error, label="data")
 plt.plot(time, hypothesis._evaluate(time), label="hypothesis")
 plt.legend()
 plt.show()
 
-nnl = NegativeLogLikelihood(hypothesis, time) 
+# popt, pcov = curve_fit(linear, time, signal, (1.0, 1.0))
+popt, pcov = curve_fit(uniform, time, signal, p0=(1.0), sigma=signal_error)
+# nnl = NegativeLogLikelihood(hypothesis, time) 
 
-minimiser = Minuit(nnl.evaluate, slope=2.1, intercept=5)
+# minimiser = Minuit(nnl.evaluate, slope=2.1, intercept=5)
 # minimiser.limits = [(0, None), (0, 10)]
 
-results = minimiser.migrad()
+# results = minimiser.migrad()
 
-hypothesis.setParameters(*results.values)
-plt.scatter(time, signal, s=2.5, label="data")
-plt.plot(time, hypothesis._evaluate(time), label="hypothesis")
+
+print(*popt)
+plt.errorbar(time, signal, yerr=signal_error, label="data")
+plt.plot(time, uniform(time, *popt), label="hypothesis")
 plt.legend()
 plt.show()
+
