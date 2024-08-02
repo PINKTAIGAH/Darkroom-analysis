@@ -17,7 +17,7 @@ FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis", "current", "time", "voltage",
 # COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "peak_start", "peak_end",  "plateau_2_end"]
 RUN_NUMBER = 8
 PLOT_TIME_AXIS = True
-AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential"]
+AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential", "0", "1", "2"]
 
 def uniform(x, a):
     return 0*x + a
@@ -60,6 +60,8 @@ def feature_io():
     feature_of_interest_names = []
     feature_of_interest_hypothesis = []
 
+    print(f"For hypothesis: 0 => uniform, 2 => linear and 3 => exponential")
+
     for _ in range(3):
         feature_of_interest_names.append(feature_name_input_loop(feature_of_interest_names))
         feature_of_interest_hypothesis.append(feature_hypothesis_input_loop())
@@ -71,13 +73,12 @@ def feature_io():
     }
 
     for name, hypothesis in zip(feature_of_interest_names, feature_of_interest_hypothesis):
-        match hypothesis:
-            case "uniform":
-                features_of_interest_dict[name]["hypothesis"] = uniform
-            case "linear":
-                features_of_interest_dict[name]["hypothesis"] = linear
-            case "exponential":
-                features_of_interest_dict[name]["hypothesis"] = exponential
+        if hypothesis == "uniform" or hypothesis == "0":
+            features_of_interest_dict[name]["hypothesis"] = uniform
+        if hypothesis == "linear" or hypothesis == "1":
+            features_of_interest_dict[name]["hypothesis"] = linear
+        if hypothesis == "exponential" or hypothesis == "2":
+            features_of_interest_dict[name]["hypothesis"] = exponential
 
     return features_of_interest_dict
         
@@ -110,9 +111,10 @@ def plot_mean_current(mean_current, time, voltage):
     Prodice an interactive plot of current-time series, extract and return coordinates of interest
     """
     # Plot an interactive version of the current respose curve
-    fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True, height_ratios=[3, 1], sharex=True)
     if PLOT_TIME_AXIS:
         ax1.scatter(time, mean_current, s=MARKER_SIZE, color=MARKER_COLOR)
+        ax2.plot(time, voltage)
         ax1.set_xlabel("time (s)")
         ax1.set_xlabel("time (s)")
     else:
@@ -130,7 +132,7 @@ def plot_mean_current_interactive(mean_current, time, voltage):
     Prodice an interactive plot of current-time series, extract and return coordinates of interest
     """
     # Plot an interactive version of the current respose curve
-    fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, height_ratios=[3, 1], constrained_layout=True)
     if PLOT_TIME_AXIS:
         ax1.scatter(time, mean_current, s=MARKER_SIZE, color=MARKER_COLOR)
         ax1.set_xlabel("time (s)")
@@ -153,14 +155,13 @@ def plot_mean_current_interactive(mean_current, time, voltage):
 
     # Save envent coordiantes
     event_coords = clicker_module.get_positions()["event"]
-    print(type(event_coords))
     print(f"\nNumber of events recorded: {event_coords.shape[0]}\n")
 
     return event_coords
 
     
 
-def generate_combined_arrays(event_coords, mean_current, time, feature_dict):
+def generate_combined_arrays(event_coords, mean_current, time, feature_dict, voltage):
     """
     Use event coords to create combined arrays of features of interest
     """ 
@@ -174,6 +175,7 @@ def generate_combined_arrays(event_coords, mean_current, time, feature_dict):
     # Create an array for the mean current peak
     feature_dict[dict_names[1]]["current"] = mean_current[feature_dict[dict_names[1]]["coord"][0] : feature_dict[dict_names[1]]["coord"][1]]
     feature_dict[dict_names[1]]["time"] = time[feature_dict[dict_names[1]]["coord"][0] : feature_dict[dict_names[1]]["coord"][1]]
+    feature_dict[dict_names[1]]["voltage"] = voltage[feature_dict[dict_names[1]]["coord"][0] : feature_dict[dict_names[1]]["coord"][1]]
 
     # Create a combined array for the mean current platau
     mean_current_plateu = []
@@ -258,14 +260,15 @@ def compute_delta_current(feature_dict):
     dict_names = list(feature_dict.keys())
     delta_curr = feature_dict[dict_names[1]]["opt_param"][-1] - feature_dict[dict_names[0]]["opt_param"][-1] 
     delta_curr_err = feature_dict[dict_names[1]]["opt_param_err"][-1] - feature_dict[dict_names[0]]["opt_param_err"][-1] 
+    voltage = feature_dict[dict_names[1]]["voltage"].mean()
 
-    print(f"The delta current is {delta_curr:.3E} +/- {delta_curr_err:.3E}")
+    return delta_curr, delta_curr_err, voltage
 
-    return delta_curr, delta_curr_err
+def write_out(delta_curr, delta_curr_err,voltage):
 
-def write_out(delta_curr, delta_curr_err):
-
-    np.savetxt(OUTPATH, np.array([delta_curr, delta_curr_err]), header="delta_curr, delta_curr_err", delimiter=",")
+    with open(OUTPATH, "a") as file:
+        file.write(f"\n#delta_curr (pA), delta_curr_err(pA), voltage\n")
+        file.write(f"{delta_curr},{delta_curr_err},{voltage}\n")
 
 def main():
 
@@ -281,7 +284,6 @@ def main():
         mean_current=toy_sin
 
 
-    print(voltage)
     plot_mean_current(mean_current, time, voltage)
     
     features_of_interest_dict = feature_io()
@@ -292,7 +294,7 @@ def main():
     # Verify number of events match what is expected and obtain combined arrays for the plateus and peaks
     if event_coords.shape[0]/2 == len(features_of_interest_dict):
         # Create arrays containing the current peak and plateu
-        features_of_interest_dict = generate_combined_arrays(event_coords, mean_current, time, features_of_interest_dict)
+        features_of_interest_dict = generate_combined_arrays(event_coords, mean_current, time, features_of_interest_dict, voltage)
 
     else:
         raise Exception(f"\nThe number of events selected is not in line with the number of expected events of 6\n")
@@ -306,9 +308,9 @@ def main():
     # plotting with fit
     plot_features_of_interest(features_of_interest_dict, True)
 
-    delta_curr, delta_curr_err = compute_delta_current(features_of_interest_dict)
+    delta_curr, delta_curr_err, voltage = compute_delta_current(features_of_interest_dict)
 
-    write_out(delta_curr, delta_curr_err)
+    write_out(delta_curr, delta_curr_err, voltage)
 
 def test():
 
