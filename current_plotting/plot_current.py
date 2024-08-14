@@ -6,8 +6,7 @@ from scipy.optimize import curve_fit
 
 # Scripting constanta
 DEBUGGING = False
-# FILEPATH = "/Users/giorgio/Gsi_data/Eris_run009.txt"
-FILEPATH = "/Users/giorgio/Gsi_data/Eris_run028.txt"
+FILEPATH = "/Users/giorgio/Gsi_data/Eris_run033.txt"
 OUTPATH = "/Users/giorgio/GSI_data/output/test.txt"
 LINE_STYLE = "-"
 LINE_WIDTH = 0.5
@@ -19,7 +18,15 @@ FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis", "current", "time", "voltage",
 RUN_NUMBER = 8
 PLOT_TIME_AXIS = True
 AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential", "0", "1", "2"]
-VOLTAGE_IDXS = ( (762, 1635), (1962, 2844), (3329, 4123), (6875, 7252), )
+VOLTAGE_IDXS = ( 
+    (3, 64, 80, 734), 
+    (855, 976, 1011, 1348), 
+    (1836, 2199, 2255, 2480), 
+    (2908, 3093, 3145, 3512), 
+    (3759, 4199, 4273, 4610), 
+    (4869, 4956, 5020, 5344), 
+    (5569, 5725, 5807, 6636), 
+)
 
 
 def uniform(x, a):

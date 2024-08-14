@@ -77,7 +77,7 @@ def plot_mean_current(mean_current, time, voltage):
     # Plot an interactive version of the current respose curve
     fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True, height_ratios=[3, 1], sharex=True)
     if PLOT_TIME_AXIS:
-        ax1.scatter(time, mean_current, s=MARKER_SIZE, color=MARKER_COLOR)
+        ax1.plot(time, mean_current, color=MARKER_COLOR)
         ax2.plot(time, voltage)
         ax1.set_xlabel("time (s)")
         ax1.set_xlabel("time (s)")
@@ -99,7 +99,7 @@ def plot_mean_current_interactive(mean_current, time, voltage):
     # Plot an interactive version of the current respose curve
     fig, (ax1, ax2) = plt.subplots(2, 1, height_ratios=[3, 1], constrained_layout=True)
     if PLOT_TIME_AXIS:
-        ax1.scatter(time, mean_current, s=MARKER_SIZE, color=MARKER_COLOR)
+        ax1.plot(time, mean_current, color=MARKER_COLOR)
         ax1.set_xlabel("time (s)")
         ax2.plot(time, voltage)
         ax2.set_xlabel("time (s)")
@@ -193,7 +193,7 @@ def main():
         # Create arrays containing the current peak and plateu
         outstring = make_output_string(features, event_coords)
         write_out(outstring)
-        plot_mean_current_special(event_coords, mean_current, time, voltage, plot_time_axis=True)
+        plot_mean_current_special(event_coords, mean_current, time, voltage, plot_time_axis=False)
     else:
         raise Exception(f"\nThe number of events selected is not in line with the number of expected events of 6\n")
 
