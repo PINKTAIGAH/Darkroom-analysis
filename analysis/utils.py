@@ -143,7 +143,7 @@ def process_current_irradiation(
         )
 
         if use_abs:
-            delta_curr_hv_linearity.append(abs(peak_curr)-abs(base_curr))
+            delta_curr_hv_linearity.append(abs(peak_curr-base_curr))
         else:
             delta_curr_hv_linearity.append(peak_curr - base_curr)
 
@@ -194,7 +194,7 @@ def process_current_irradiation_alpha(
                 (idx3,idx4), time, mean_current, mean_current_err
             )
 
-            delta_curr_dict["50"][key] = abs(peak_curr)-abs(base_curr)
+            delta_curr_dict["50"][key] = abs(peak_curr-base_curr)
             delta_curr_err_dict["50"][key] = abs(peak_curr_err)+abs(base_curr_err)
             baseline_curr_dict["50"][key] = base_curr
             baseline_curr_err_dict["50"][key] = base_curr_err
@@ -207,7 +207,7 @@ def process_current_irradiation_alpha(
                 (idx3,idx4), time, mean_current, mean_current_err
             )
 
-            delta_curr_dict["200"][key] = abs(peak_curr)-abs(base_curr)
+            delta_curr_dict["200"][key] = abs(peak_curr-base_curr)
             delta_curr_err_dict["200"][key] = abs(peak_curr_err)+abs(base_curr_err)
             baseline_curr_dict["200"][key] = base_curr
             baseline_curr_err_dict["200"][key] = base_curr_err

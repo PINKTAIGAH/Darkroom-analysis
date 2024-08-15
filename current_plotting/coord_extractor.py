@@ -2,12 +2,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_point_clicker import clicker
-from scipy.optimize import curve_fit
 
 # Scripting constanta
 DEBUGGING = False
-FILEPATH = "/Users/giorgio/Gsi_data/Eris_run003.txt"
-OUTPATH = "/Users/giorgio/GSI_data/output/test.txt"
+FILEPATH = "/Users/giorgio/Data/darkroom/Eris_run017.txt"
+OUTPATH = "/Users/giorgio/Data/darkroom/output/coord_extraction.txt"
 LINE_STYLE = "-"
 LINE_WIDTH = 1.5
 MARKER_STYLE = "x"

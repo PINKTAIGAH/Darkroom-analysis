@@ -1,13 +1,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_point_clicker import clicker
-from scipy.optimize import curve_fit
 
 # Scripting constanta
 DEBUGGING = False
-FILEPATH = "/Users/giorgio/Gsi_data/Eris_run003.txt"
-OUTPATH = "/Users/giorgio/GSI_data/output/test.txt"
+FILEPATH = "/Users/giorgio/Data/darkroom/Eris_run017.txt"
 LINE_STYLE = "-"
 LINE_WIDTH = 0.5
 MARKER_STYLE = "x"
@@ -16,17 +13,11 @@ MARKER_SIZE = 0.5
 FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis", "current", "time", "voltage", "opt_param", "opt_param_err", ]
 # COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "peak_start", "peak_end",  "plateau_2_end"]
 RUN_NUMBER = 8
-PLOT_TIME_AXIS = True
+PLOT_TIME_AXIS = False
 AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential", "0", "1", "2"]
-VOLTAGE_IDXS = ( 
-    (3, 64, 80, 734), 
-    (855, 976, 1011, 1348), 
-    (1836, 2199, 2255, 2480), 
-    (2908, 3093, 3145, 3512), 
-    (3759, 4199, 4273, 4610), 
-    (4869, 4956, 5020, 5344), 
-    (5569, 5725, 5807, 6636), 
-)
+VOLTAGE_IDXS = ( (0, 83), (224, 362), (400, 1058), (1137, 2489), (2521, 3467), (3500, 4980), (5030, 5426), (5457, 5706), )
+
+
 
 
 def uniform(x, a):
