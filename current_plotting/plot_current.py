@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -52,12 +51,12 @@ def load_data():
     processed_data = np.delete(processed_data, negative_idx, axis=0).astype(np.float32)
 
     # Excract from the data the timiing and meant current datapoints
-    time = processed_data[:, 0] 
+    time = processed_data[:, 0]
     applied_voltage = processed_data[:, 1]
-    mean_current = processed_data[:, 2] 
+    mean_current = processed_data[:, 2]
 
     time_diff= np.diff(time)
-    
+
     return time, applied_voltage, mean_current
 
 def feature_io():
@@ -89,17 +88,17 @@ def feature_io():
             features_of_interest_dict[name]["hypothesis"] = exponential
 
     return features_of_interest_dict
-        
+
 
 def feature_name_input_loop(feature_of_interest_names, feature_name=None,):
-    
+
         while feature_name is None:
             feature_name = input("\nInput name of feature: ")
-        
+
             if feature_name in feature_of_interest_names:
                 feature_name = None
                 print("\nName of feature is already in use. Please name it something else")
-            
+
         return feature_name
 
 def feature_hypothesis_input_loop(feature_hypothesis=None):
@@ -110,8 +109,8 @@ def feature_hypothesis_input_loop(feature_hypothesis=None):
             if feature_hypothesis not in AVAILABLE_FEATURE_HYPOTHESIS:
                 feature_hypothesis = None
                 print(f"\nThe hypothesis selected is not recognised. Please choose from {AVAILABLE_FEATURE_HYPOTHESIS}")
-            
-        return feature_hypothesis    
+
+        return feature_hypothesis
 
 
 def plot_mean_current(mean_current, time, voltage):
@@ -205,4 +204,4 @@ def test():
 
 if __name__ == "__main__":
     main()
-    
+
