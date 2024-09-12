@@ -1,0 +1,25 @@
+line_style:                   "-"
+line_width:                   0.5
+marker_style:                 "x"
+marker_color:                 "red"
+marker_size:                  0.5
+plot_time_axis:               true
+print_coords_to_cli:          true
+debug:                        false
+voltage_boundaries:           [ [6665, 7117], [8020, 8898], ]
+feature_of_interest_keys:
+  - "coord"
+  - "hypothesis"
+  - "current"
+  - "time"
+  - "voltage"
+  - "opt_param"
+  - "opt_param_err"
+
+available_feature_hypothesis:
+  - "uniform"
+  - "linear"
+  - "exponential"
+  - "0"
+  - "1"
+  - "2"

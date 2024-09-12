@@ -1,42 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
+import yaml
+import os 
 
-# Scripting constanta
-DEBUGGING = False
-FILEPATH = "/Users/giorgio/Data/darkroom/Eris_run017.txt"
-LINE_STYLE = "-"
-LINE_WIDTH = 0.5
-MARKER_STYLE = "x"
-MARKER_COLOR = "red"
-MARKER_SIZE = 0.5
-FEATURE_OF_INTEREST_KEYS = ["coord", "hypothesis", "current", "time", "voltage", "opt_param", "opt_param_err", ]
-# COORDS_OF_INTEREST_KEYS = ["plateau_1_start", "peak_start", "peak_end",  "plateau_2_end"]
-RUN_NUMBER = 8
-PLOT_TIME_AXIS = False
-AVAILABLE_FEATURE_HYPOTHESIS = ["uniform", "linear", "exponential", "0", "1", "2"]
-VOLTAGE_IDXS = ( (0, 83), (224, 362), (400, 1058), (1137, 2489), (2521, 3467), (3500, 4980), (5030, 5426), (5457, 5706), )
+CFG_DIR = "config.yaml"
+with open(CFG_DIR, "r") as file:
+    CFG = yaml.safe_load(file)
 
+VOLTAGE_IDXS = [ [4505, 5189], [8033, 9062], ]
 
-
-
-def uniform(x, a):
-    return 0*x + a
-
-def linear(x, a, b):
-    return a*x + b
-
-def exponential(x, a, b, c):
-    return a*np.exp(b*x) + c
-
-
-
-
-def load_data():
+def load_data(infile):
     """
     Read, load and process data and return arrays containing the time, voltage and mean current readings of the run
     """
     # Import the raw data file as an array of strings
-    data = np.loadtxt(FILEPATH, dtype=str, usecols=range(6),)
+    data = np.loadtxt(infile, dtype=str, usecols=range(6),)
 
     # Locate elements of array associated to the first elemont of a header
     header_mask = data == "time"
@@ -59,87 +38,11 @@ def load_data():
 
     return time, applied_voltage, mean_current
 
-def feature_io():
-    """
-    I/O loop for the name and hypothesis for the feature of interest
-    """
-
-    feature_of_interest_names = []
-    feature_of_interest_hypothesis = []
-
-    print(f"For hypothesis: 0 => uniform, 2 => linear and 3 => exponential")
-
-    for _ in range(3):
-        feature_of_interest_names.append(feature_name_input_loop(feature_of_interest_names))
-        feature_of_interest_hypothesis.append(feature_hypothesis_input_loop())
-
-    features_of_interest_dict = {
-        name: {
-            key: None for key in FEATURE_OF_INTEREST_KEYS
-        } for name in feature_of_interest_names
-    }
-
-    for name, hypothesis in zip(feature_of_interest_names, feature_of_interest_hypothesis):
-        if hypothesis == "uniform" or hypothesis == "0":
-            features_of_interest_dict[name]["hypothesis"] = uniform
-        if hypothesis == "linear" or hypothesis == "1":
-            features_of_interest_dict[name]["hypothesis"] = linear
-        if hypothesis == "exponential" or hypothesis == "2":
-            features_of_interest_dict[name]["hypothesis"] = exponential
-
-    return features_of_interest_dict
-
-
-def feature_name_input_loop(feature_of_interest_names, feature_name=None,):
-
-        while feature_name is None:
-            feature_name = input("\nInput name of feature: ")
-
-            if feature_name in feature_of_interest_names:
-                feature_name = None
-                print("\nName of feature is already in use. Please name it something else")
-
-        return feature_name
-
-def feature_hypothesis_input_loop(feature_hypothesis=None):
-
-        while feature_hypothesis is None:
-            feature_hypothesis = input("\nInput feature hypothesis: ")
-
-            if feature_hypothesis not in AVAILABLE_FEATURE_HYPOTHESIS:
-                feature_hypothesis = None
-                print(f"\nThe hypothesis selected is not recognised. Please choose from {AVAILABLE_FEATURE_HYPOTHESIS}")
-
-        return feature_hypothesis
-
-
-def plot_mean_current(mean_current, time, voltage):
-    """
-    Prodice an interactive plot of current-time series, extract and return coordinates of interest
-    """
-    # Plot an interactive version of the current respose curve
-    fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True, height_ratios=[3, 1], sharex=True)
-    if PLOT_TIME_AXIS:
-        ax1.scatter(time, mean_current, s=MARKER_SIZE, color=MARKER_COLOR)
-        ax2.plot(time, voltage)
-        ax1.set_xlabel("time (s)")
-        ax1.set_xlabel("time (s)")
-    else:
-        ax1.plot(mean_current, lw=LINE_WIDTH)
-        ax1.set_xlabel("a.u")
-        ax2.set_xlabel("a.u")
-
-    ax1.set_title(f"Current readings for run {RUN_NUMBER}")
-    ax1.set_ylabel("Current (pA)")
-    ax2.set_ylabel("Voltage (V)")
-    plt.show()
-
-def plot_mean_current_special(mean_current, time, voltage):
-
+def plot_mean_current_special(mean_current, time, voltage, run_number=1):
 
         # Plot an interactive version of the current respose curve
     fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True, height_ratios=[3, 1], sharex=True)
-    if PLOT_TIME_AXIS:
+    if CFG["plot_time_axis"]:
         ax1.plot(time, mean_current, alpha=0.2)
         for i, idxs in enumerate(VOLTAGE_IDXS):
             if len(idxs)==2:
@@ -158,7 +61,7 @@ def plot_mean_current_special(mean_current, time, voltage):
 
     else:
         x_axis = range(len(mean_current))
-        ax1.plot(x_axis, mean_current, lw=LINE_WIDTH, alpha=0.2)
+        ax1.plot(x_axis, mean_current, lw=CFG["line_width"], alpha=0.2)
         ax1.set_xlabel("a.u")
         ax2.plot(voltage)
         ax1.set_xlabel("time (s)")
@@ -175,28 +78,35 @@ def plot_mean_current_special(mean_current, time, voltage):
                 ax1.plot(x_axis[idxs[2]:idxs[3]], mean_current[idxs[2]:idxs[3]])
                 ax1.plot(x_axis[idxs[4]:idxs[5]], mean_current[idxs[4]:idxs[5]])
 
-    ax1.set_title(f"Current readings for run {RUN_NUMBER}")
+    ax1.set_title(f"Current readings for run {run_number}")
     ax1.set_ylabel("Current (pA)")
     ax2.set_ylabel("Voltage (V)")
     plt.show()
 
+def initialise_argument_parser():
+    # Define argiment parcer to process cli flags
+    parser = argparse.ArgumentParser()
+    # -i InputFile -r RunNumber 
+    parser.add_argument("-i", "--infile", dest="infile", default="in.txt",help= "Input file")
+    parser.add_argument("-r", "--run", dest="run", default="1", help="Run number")
+    return parser
+
 
 def main():
 
+    # Initialise argument parser object
+    parser = initialise_argument_parser()
+    arguments = parser.parse_args() 
+
+    # Test if infile given exists
+    if not os.path.exists(arguments.infile):
+        raise Exception(f"The input file provided does not exist.")
+
     # Obtain measurments of run
-    time, voltage, mean_current = load_data()
-
-    """
-    Debugging
-    """
-    if DEBUGGING:
-        toy_sin = np.sin(np.linspace(0,100, 300)*0.15)
-        time = np.arange(0, toy_sin.size)
-        mean_current=toy_sin
-
+    time, voltage, mean_current = load_data(arguments.infile)
 
     # plot_mean_current(mean_current, time, voltage)
-    plot_mean_current_special(mean_current, time, voltage)
+    plot_mean_current_special(mean_current, time, voltage, run_number=arguments.run)
 
 def test():
 

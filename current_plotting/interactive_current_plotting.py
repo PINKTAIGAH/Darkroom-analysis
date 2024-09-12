@@ -5,7 +5,6 @@ from mpl_point_clicker import clicker
 from scipy.optimize import curve_fit
 
 # Scripting constanta
-DEBUGGING = False
 FILEPATH = "/Users/giorgio/Gsi_data/Eris_run021.txt"
 OUTPATH = "/Users/giorgio/GSI_data/output/test.txt"
 LINE_STYLE = "-"
@@ -274,15 +273,6 @@ def main():
 
     # Obtain measurments of run
     time, voltage, mean_current = load_data()
-
-    """
-    Debugging
-    """
-    if DEBUGGING:
-        toy_sin = np.sin(np.linspace(0,100, 300)*0.15)
-        time = np.arange(0, toy_sin.size)
-        mean_current=toy_sin
-
 
     plot_mean_current(mean_current, time, voltage)
     
