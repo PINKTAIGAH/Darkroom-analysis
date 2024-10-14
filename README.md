@@ -1,8 +1,6 @@
 # Darkroom-analysis
 A repository designed to quickly analyse current measurements of SC-CVD diamonds taken in the LISA project
 
-PLAN ON ADDING MORE DETAILS TONIGHT
-
 ## Setup
 
 ### Getting Started
