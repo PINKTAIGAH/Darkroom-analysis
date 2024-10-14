@@ -16,6 +16,6 @@ pip install numpy matplotlib scipy mpl_point_clicker
 Clone this repository
 
 ~~~bash
-git clone t
+git clone https://github.com/PINKTAIGAH/Darkroom-analysis.git
 cd RestoreGAN
 ~~~
