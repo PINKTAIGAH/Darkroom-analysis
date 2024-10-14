@@ -27,5 +27,5 @@ available_feature_hypothesis:
 print_coords_to_cli:          true
 
 # Inputs specific to plot_current.py script
-#range_boundaries:           null
-range_boundaries:           [ [79, 395], [1173, 3906], [8885, 11461], ]
+range_boundaries:           null
+# range_boundaries:           [ [79, 395], [1173, 3906], [8885, 11461], ]
