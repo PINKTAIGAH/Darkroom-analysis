@@ -90,21 +90,23 @@ def plot_mean_current_with_ranges(mean_current, time, voltage, run_number=1):
     # Code block for plotting current using time as the x axis
     if CFG["plot_time_axis"]:
         # Plot overall mean current of the run
-        ax1.plot(time, mean_current, alpha=0.2)
-        # Iterate over index ranges for each current measurment
-        for i, idxs in enumerate(CFG["voltage_boundaries"]):
-            # Plot the mean current if there is only one index pair
-            if len(idxs)==2:
-                ax1.plot(time[idxs[0]:idxs[1]], mean_current[idxs[0]:idxs[1]])
-            # Plot the mean current if there are only two index pair
-            if len(idxs) ==4:
-                ax1.plot(time[idxs[0]:idxs[1]], mean_current[idxs[0]:idxs[1]])
-                ax1.plot(time[idxs[2]:idxs[3]], mean_current[idxs[2]:idxs[3]])
-            # Plot the mean current if there are only three index pair
-            elif len(idxs) ==6:
-                ax1.plot(time[idxs[0]:idxs[1]], mean_current[idxs[0]:idxs[1]])
-                ax1.plot(time[idxs[2]:idxs[3]], mean_current[idxs[2]:idxs[3]])
-                ax1.plot(time[idxs[4]:idxs[5]], mean_current[idxs[4]:idxs[5]])
+        ax1.plot(time, mean_current, alpha=0.2 if CFG["range_boundaries"] is not None else 1.0)
+        # Check if current ranges have been provided in the config file.
+        if CFG["range_boundaries"] is not None:
+            # Iterate over index ranges for each current measurment
+            for i, idxs in enumerate(CFG["range_boundaries"]):
+                # Plot the mean current if there is only one index pair
+                if len(idxs)==2:
+                    ax1.plot(time[idxs[0]:idxs[1]], mean_current[idxs[0]:idxs[1]])
+                # Plot the mean current if there are only two index pair
+                if len(idxs) ==4:
+                    ax1.plot(time[idxs[0]:idxs[1]], mean_current[idxs[0]:idxs[1]])
+                    ax1.plot(time[idxs[2]:idxs[3]], mean_current[idxs[2]:idxs[3]])
+                # Plot the mean current if there are only three index pair
+                elif len(idxs) ==6:
+                    ax1.plot(time[idxs[0]:idxs[1]], mean_current[idxs[0]:idxs[1]])
+                    ax1.plot(time[idxs[2]:idxs[3]], mean_current[idxs[2]:idxs[3]])
+                    ax1.plot(time[idxs[4]:idxs[5]], mean_current[idxs[4]:idxs[5]])
 
         # Plot the voltage of the run
         ax2.plot(time, voltage)

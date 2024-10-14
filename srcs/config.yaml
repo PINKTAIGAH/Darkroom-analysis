@@ -4,9 +4,7 @@ marker_style:                 "x"
 marker_color:                 "red"
 marker_size:                  0.5
 plot_time_axis:               true
-print_coords_to_cli:          true
 debug:                        false
-voltage_boundaries:           [ [133, 441], [497, 631], [734, 970], [1028, 1161], ]
 feature_of_interest_keys:
   - "coord"
   - "hypothesis"
@@ -23,3 +21,11 @@ available_feature_hypothesis:
   - "0"
   - "1"
   - "2"
+
+
+# Inputs specific to coord_extract.py script
+print_coords_to_cli:          true
+
+# Inputs specific to plot_current.py script
+#range_boundaries:           null
+range_boundaries:           [ [79, 395], [1173, 3906], [8885, 11461], ]
